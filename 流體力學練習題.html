@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高中物理：流體靜力學 互動式線上評量</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- KaTeX CDN (數學公式渲染) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .katex-display { margin: 0.5em 0; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- 頁首與資訊欄 -->
+  <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold">高中物理：流體靜力學 線上評量</h1>
+        <p class="text-xs sm:text-sm text-indigo-200 mt-1">10 題基礎觀念定義 + 5 題高層次思考進階題</p>
+      </div>
+      
+      <!-- 計分卡與進度 -->
+      <div class="flex items-center gap-4 bg-indigo-800/80 px-4 py-2 rounded-xl border border-indigo-500/30">
+        <div class="text-center">
+          <span class="block text-xs text-indigo-300">答對題數</span>
+          <span id="score-count" class="text-lg font-bold text-emerald-400">0 / 15</span>
+        </div>
+        <div class="h-8 w-px bg-indigo-600"></div>
+        <div class="text-center">
+          <span class="block text-xs text-indigo-300">作答進度</span>
+          <span id="progress-count" class="text-lg font-bold text-amber-300">0%</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要內容區 -->
+  <main class="max-w-5xl mx-auto px-4 py-8 flex-1 w-full">
+    
+    <!-- 分類篩選頁籤 -->
+    <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-3">
+      <button onclick="filterCategory('all')" id="tab-all" class="px-4 py-2 rounded-lg text-sm font-semibold transition bg-indigo-600 text-white shadow">
+        全部題目 (15)
+      </button>
+      <button onclick="filterCategory('basic')" id="tab-basic" class="px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+        基礎觀念題 (1~10)
+      </button>
+      <button onclick="filterCategory('advanced')" id="tab-advanced" class="px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+        進階思考題 (11~15)
+      </button>
+      
+      <button onclick="resetQuiz()" class="ml-auto px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg transition">
+        重新測驗
+      </button>
+    </div>
+
+    <!-- 題目列表容器 -->
+    <div id="quiz-container" class="space-y-6">
+      <!-- 題目由 JavaScript 動態生成 -->
+    </div>
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="bg-slate-200 text-center py-4 text-xs text-slate-500 border-t border-slate-300">
+    高中物理「流體靜力學」互動式線上評量系統
+  </footer>
+
+  <!-- 腳本邏輯 -->
+  <script>
+    const quizData = [
+      {
+        id: 1,
+        type: 'basic',
+        title: '第 1 題【流體壓力定義】',
+        question: '將一容器裝滿水後靜置於水平桌面上，若水對容器底部的垂直作用力為 $100\\text{ N}$，容器底面積為 $0.02\\text{ m}^2$，則水作用於容器底部的壓強為多少 $\\text{Pa}$？',
+        options: [
+          '(A) $500\\text{ Pa}$',
+          '(B) $2000\\text{ Pa}$',
+          '(C) $5000\\text{ Pa}$',
+          '(D) $10000\\text{ Pa}$'
+        ],
+        answer: 2,
+        explanation: '根據流體壓力與作用力之公式 $F = PA$：<br>$$P = \\frac{F}{A} = \\frac{100\\text{ N}}{0.02\\text{ m}^2} = 5000\\text{ Pa}$$'
+      },
+      {
+        id: 2,
+        type: 'basic',
+        title: '第 2 題【液體靜壓力】',
+        question: '水池深處的液體壓力來自於水面上方的大氣壓與水重。已知水的密度 $\\rho = 1000\\text{ kg/m}^3$，重力加速度 $g = 10\\text{ m/s}^2$。在水池深度 $h = 3\\text{ m}$ 處，僅由水重產生的靜液壓力差 $\\Delta P$ 為多少 $\\text{Pa}$？',
+        options: [
+          '(A) $3000\\text{ Pa}$',
+          '(B) $30000\\text{ Pa}$',
+          '(C) $100000\\text{ Pa}$',
+          '(D) $300000\\text{ Pa}$'
+        ],
+        answer: 1,
+        explanation: '依據液體深度與壓力差之公式 $\\Delta P = \\rho g h$：<br>$$\\Delta P = 1000\\text{ kg/m}^3 \\times 10\\text{ m/s}^2 \\times 3\\text{ m} = 30000\\text{ Pa}$$'
+      },
+      {
+        id: 3,
+        type: 'basic',
+        title: '第 3 題【帕斯卡原理】',
+        question: '一密閉裝滿不可壓縮油液的液壓機，小活塞截面積為 $5\\text{ cm}^2$，大活塞截面積為 $100\\text{ cm}^2$。若在小活塞上施加 $20\\text{ N}$ 向下的作用力，則大活塞可獲得多少 $\\text{N}$ 向上的推力？',
+        options: [
+          '(A) $400\\text{ N}$',
+          '(B) $500\\text{ N}$',
+          '(C) $800\\text{ N}$',
+          '(D) $1000\\text{ N}$'
+        ],
+        answer: 0,
+        explanation: '根據帕斯卡原理 $\\frac{F_1}{A_1} = \\frac{F_2}{A_2}$：<br>$$\\frac{20\\text{ N}}{5\\text{ cm}^2} = \\frac{F_2}{100\\text{ cm}^2} \\implies F_2 = 400\\text{ N}$$'
+      },
+      {
+        id: 4,
+        type: 'basic',
+        title: '第 4 題【連通管原理】',
+        question: '在一 U 形管中先裝入密度為 $\\rho_1 = 1.0\\text{ g/cm}^3$ 的水，再自左管注入密度為 $\\rho_2 = 0.8\\text{ g/cm}^3$ 的油（兩者不互溶）。靜止平衡時，左管的油柱高度為 $10\\text{ cm}$，則右管高於油水交界面的水柱高度 $h_1$ 為多少 $\\text{cm}$？',
+        options: [
+          '(A) $5\\text{ cm}$',
+          '(B) $6\\text{ cm}$',
+          '(C) $7\\text{ cm}$',
+          '(D) $8\\text{ cm}$'
+        ],
+        answer: 3,
+        explanation: '取油水交界面為基準面，靜止流體同深度壓強相等：<br>$$\\rho_2 h_2 = \\rho_1 h_1 \\implies 0.8 \\times 10 = 1.0 \\times h_1 \\implies h_1 = 8\\text{ cm}$$'
+      },
+      {
+        id: 5,
+        type: 'basic',
+        title: '第 5 題【阿基米德原理與浮力】',
+        question: '一體積為 $200\\text{ cm}^3$ 的實心金屬塊完全浸沒於密度為 $1.2\\text{ g/cm}^3$ 的鹽水中，則此金屬塊所受到的浮力大小為多少克重（$\\text{gw}$）？',
+        options: [
+          '(A) $240\\text{ gw}$',
+          '(B) $300\\text{ gw}$',
+          '(C) $360\\text{ gw}$',
+          '(D) $480\\text{ gw}$'
+        ],
+        answer: 0,
+        explanation: '依據阿基米德原理，浮力大小等於排開的流體重：<br>$$B = \\rho_{液} V_{排} = 1.2\\text{ g/cm}^3 \\times 200\\text{ cm}^3 = 240\\text{ gw}$$'
+      },
+      {
+        id: 6,
+        type: 'basic',
+        title: '第 6 題【浮心與穩定性概念】',
+        question: '關於浮體在流體中的「浮心（Center of Buoyancy）」與靜止穩定性，下列敘述何者正確？',
+        options: [
+          '(A) 浮心即為物體本身的質心或重心',
+          '(B) 浮心為物體沒入流體部分之幾何中心，與物體的質量分布無關',
+          '(C) 物體的重心只要高於浮心，物體傾斜時就一定會發生翻覆',
+          '(D) 浮力的作用點會隨著物體內部質量分布改變而移動'
+        ],
+        answer: 1,
+        explanation: '浮心定義為「物體沒入流體範圍的幾何中心」，完全由沒入之幾何形狀決定，與物體內部的質量分布無關。'
+      },
+      {
+        id: 7,
+        type: 'basic',
+        title: '第 7 題【表面張力拉力公式】',
+        question: '一長度 $L = 0.05\\text{ m}$ 的細金屬桿橫置於表面張力 $\\gamma = 0.07\\text{ N/m}$ 的水面上。若將金屬桿由水面垂直拉起，當細桿兩側均形成水膜時，表面張力施加於細桿上的向下總拉力 $F$ 為多少 $\\text{N}$？',
+        options: [
+          '(A) $0.00175\\text{ N}$',
+          '(B) $0.0035\\text{ N}$',
+          '(C) $0.007\\text{ N}$',
+          '(D) $0.014\\text{ N}$'
+        ],
+        answer: 2,
+        explanation: '細桿兩側均與水膜接觸，接觸總長度為 $2L$：<br>$$F = 2 \\gamma L = 2 \\times 0.07\\text{ N/m} \\times 0.05\\text{ m} = 0.007\\text{ N}$$'
+      },
+      {
+        id: 8,
+        type: 'basic',
+        title: '第 8 題【接觸角與楊氏方程式】',
+        question: '當液滴滴在固體表面上時，液氣界面張力為 $\\gamma_{LG}$、固氣界面張力為 $\\gamma_{SG}$、固液界面張力為 $\\gamma_{SL}$。若已知固氣界面張力小於固液界面張力（$\\gamma_{SG} < \\gamma_{SL}$），則根據楊氏方程式，下列何者正確？',
+        options: [
+          '(A) $\\cos\\theta_C > 0$，接觸角 $\\theta_C < 90^\\circ$，屬於潤濕（親水）現象',
+          '(B) $\\cos\\theta_C = 0$，接觸角 $\\theta_C = 90^\\circ$',
+          '(C) 界面平衡無法建立',
+          '(D) $\\cos\\theta_C < 0$，接觸角 $\\theta_C > 90^\\circ$，屬於不潤濕（疏水）現象'
+        ],
+        answer: 3,
+        explanation: '由楊氏方程式 $\\cos\\theta_C = \\frac{\\gamma_{SG}-\\gamma_{SL}}{\\gamma_{LG}}$。當 $\\gamma_{SG} < \\gamma_{SL}$ 時，$\\cos\\theta_C < 0$，故接觸角 $\\theta_C > 90^\\circ$，屬於不潤濕（疏水）現象。'
+      },
+      {
+        id: 9,
+        type: 'basic',
+        title: '第 9 題【毛細現象上升高度公式】',
+        question: '在一內半徑為 $r$ 的細圓玻璃管中，液態表面張力為 $\\gamma$、密度為 $\\rho$、接觸角為 $\\theta$。若液體在管中因毛細現象上升的高度為 $h$，重力加速度為 $g$，則 $h$ 的表示式為何？',
+        options: [
+          '(A) $h = \\frac{2\\gamma \\cos\\theta}{\\rho g r}$',
+          '(B) $h = \\frac{\\gamma \\cos\\theta}{\\rho g r}$',
+          '(C) $h = \\frac{\\gamma \\cos\\theta}{2\\rho g r}$',
+          '(D) $h = \\frac{\\gamma \\cos\\theta}{4\\rho g r}$'
+        ],
+        answer: 0,
+        explanation: '根據向上表面張力與向下液柱重力平衡 $2\\pi r \\gamma \\cos\\theta = \\pi r^2 h \\rho g$，可解得：<br>$$h = \\frac{2\\gamma \\cos\\theta}{\\rho g r}$$'
+      },
+      {
+        id: 10,
+        type: 'basic',
+        title: '第 10 題【楊-拉普拉斯公式：肥皂泡】',
+        question: '一在大氣中半徑為 $R = 0.02\\text{ m}$ 的球形肥皂泡，若肥皂液的表面張力為 $\\gamma = 0.03\\text{ N/m}$。此肥皂泡內部的氣體壓強與外部大氣壓力的壓強差 $\\Delta P = P_{in} - P_{out}$ 為多少 $\\text{Pa}$？',
+        options: [
+          '(A) $3.0\\text{ Pa}$',
+          '(B) $6.0\\text{ Pa}$',
+          '(C) $9.0\\text{ Pa}$',
+          '(D) $12.0\\text{ Pa}$'
+        ],
+        answer: 1,
+        explanation: '肥皂泡具有內、外兩個液氣界面，其內外壓強差為：<br>$$\\Delta P = \\frac{4\\gamma}{R} = \\frac{4 \\times 0.03\\text{ N/m}}{0.02\\text{ m}} = 6.0\\text{ Pa}$$'
+      },
+      {
+        id: 11,
+        type: 'advanced',
+        title: '第 11 題【非均勻連通管與體積守恆綜合分析】',
+        question: '一兩端開口且粗細不均勻的 U 形管豎直固定，左管截面積為 $A_1 = 2\\text{ cm}^2$，右管截面積為 $A_2 = 4\\text{ cm}^2$，管內裝有適量的水銀（密度 $\\rho_m = 13.6\\text{ g/cm}^3$）。今自左管頂端緩慢注入高度為 $40.8\\text{ cm}$ 的水（密度 $\\rho_w = 1.0\\text{ g/cm}^3$），水與水銀互不相溶。當系統重新達到靜止平衡時，右管的水銀面較注入水之前上升了多少 $\\text{cm}$？',
+        options: [
+          '(A) $0.25\\text{ cm}$',
+          '(B) $0.5\\text{ cm}$',
+          '(C) $1.0\\text{ cm}$',
+          '(D) $2.0\\text{ cm}$'
+        ],
+        answer: 2,
+        explanation: '1. 設左管水銀下降 $x_1$，右管上升 $x_2$。由體積守恆：$A_1 x_1 = A_2 x_2 \\implies 2 x_1 = 4 x_2 \\implies x_1 = 2 x_2$。<br>2. 兩管水銀面總高度差 $\\Delta h_m = x_1 + x_2 = 3 x_2$。<br>3. 取左管「水—水銀交界面」為基準面，依連通管原理壓強相等：<br>$$P_L = P_R \\implies \\rho_w g h_w = \\rho_m g \\Delta h_m \\implies 1.0 \\times 40.8 = 13.6 \\times (3 x_2)$$<br>4. 解得 $40.8 = 40.8 x_2 \\implies x_2 = 1.0\\text{ cm}$。'
+      },
+      {
+        id: 12,
+        type: 'advanced',
+        title: '第 12 題【幾何曲率與楊-拉普拉斯公式應用】',
+        question: '在一圓柱形細玻璃管（內徑為 $d$）中豎直插入水中，水對玻璃完全潤濕（接觸角 $\\theta = 0^\\circ$），管內液面形成半球形凹面，毛細現象導致管內水面上升高度為 $h_1$。若改將兩平行的平整玻璃板（板間距亦設為 $d$）豎直插入水中，板間液面形成半圓柱形凹面。假設接觸角同為 $0^\\circ$，忽略邊緣效應，兩平行板間水面上升的高度 $h_2$ 與圓管上升高度 $h_1$ 的比值 $h_2 / h_1$ 為何？',
+        options: [
+          '(A) $0.25$',
+          '(B) $0.5$',
+          '(C) $1.0$',
+          '(D) $2.0$'
+        ],
+        answer: 1,
+        explanation: '1. 圓管情況（球面凹面）：$R_1=R_2=r=\\frac{d}{2} \\implies \\Delta P_1 = \\frac{2\\gamma}{r} \\implies h_1 = \\frac{2\\gamma}{\\rho g r}$。<br>2. 平行板情況（圓柱面凹面）：$R_1=r, R_2=\\infty \\implies \\Delta P_2 = \\frac{\\gamma}{r} \\implies h_2 = \\frac{\\gamma}{\\rho g r}$。<br>3. 比值 $\\frac{h_2}{h_1} = 0.5$。'
+      },
+      {
+        id: 13,
+        type: 'advanced',
+        title: '第 13 題【雙肥皂泡連體隔膜之曲率與方向】',
+        question: '兩個半徑分別為 $R_1 = 3\\text{ cm}$ 與 $R_2 = 6\\text{ cm}$ 的球形肥皂泡在大氣中相碰撞並黏合，形成一個中間由共同肥皂膜隔開的雙泡結構。已知肥皂液表面張力為 $\\gamma$，試問此共同隔膜的曲率半徑 $R$ 為多少 $\\text{cm}$？且隔膜的凹面朝向何處？',
+        options: [
+          '(A) $R = 2\\text{ cm}$，凹面朝向小氣泡',
+          '(B) $R = 3\\text{ cm}$，凹面朝向大氣泡',
+          '(C) $R = 6\\text{ cm}$，凹面朝向大氣泡',
+          '(D) $R = 6\\text{ cm}$，凹面朝向小氣泡'
+        ],
+        answer: 3,
+        explanation: '1. 兩氣泡內壓強差 $\\Delta P = \\frac{4\\gamma}{R_1} - \\frac{4\\gamma}{R_2} = \\frac{4\\gamma}{R}$。<br>2. $\\frac{1}{R} = \\frac{1}{3} - \\frac{1}{6} = \\frac{1}{6} \\implies R = 6\\text{ cm}$。<br>3. 小氣泡內部壓強較大（$P_1 > P_2$），由楊-拉普拉斯原理，凹面必定朝向壓強較大的小氣泡。'
+      },
+      {
+        id: 14,
+        type: 'advanced',
+        title: '第 14 題【加速系統中的等效重力場與浮力】',
+        question: '一盛水容器放在以水平加速度 $a = 0.75 g$（$g$ 為重力加速度）向右作等加速度直線運動的火車上。當容器內的水相對於車廂達到靜止時，水面與水平面形成一傾角 $\\theta$。若在水面下深處由靜止釋放一個密度為水密度一半（$\\rho_{物} = 0.5 \\rho_{水}$）的小木球，忽略水的阻力，則水面傾角的正切值 $\\tan\\theta$ 以及小木球釋放瞬間相對於車廂的加速度大小 $a_{木}$ 分別為何？',
+        options: [
+          '(A) $\\tan\\theta = 0.75$，$a_{木} = 1.25 g$',
+          '(B) $\\tan\\theta = 0.75$，$a_{木} = 1.50 g$',
+          '(C) $\\tan\\theta = 1.33$，$a_{木} = 1.75 g$',
+          '(D) $\\tan\\theta = 1.33$，$a_{木} = 2.00 g$'
+        ],
+        answer: 0,
+        explanation: '1. 等效重力場大小 $g_{eff} = \\sqrt{g^2 + (0.75g)^2} = 1.25 g$。<br>2. 水面垂直於等效重力場，故 $\\tan\\theta = \\frac{a}{g} = 0.75$。<br>3. 木球受淨力 $F_{net} = (\\rho_{水} - \\rho_{物})V g_{eff} = 0.5 \\rho_{水} V g_{eff}$。<br>4. 相對加速度 $a_{木} = \\frac{F_{net}}{m} = \\frac{0.5 \\rho_{水} V g_{eff}}{0.5 \\rho_{水} V} = g_{eff} = 1.25 g$。'
+      },
+      {
+        id: 15,
+        type: 'advanced',
+        title: '第 15 題【兩平行玻璃板間薄水膜之表面張力吸附力】',
+        question: '兩塊面積均為 $A = 100\\text{ cm}^2$ 的正方形玻璃板，中間夾有少量水。當兩板被壓緊時，水在兩板之間形成厚度僅為 $d = 0.01\\text{ mm}$ 的均勻薄水膜。已知水對玻璃完全潤濕（接觸角 $\\theta = 0^\\circ$），水的表面張力 $\\gamma = 0.07\\text{ N/m}$。忽略玻璃板自重與邊緣效應，若欲將兩玻璃板沿垂直於板面的方向直接拉開，至少需要施加多少牛頓（$\\text{N}$）的垂直拉力？',
+        options: [
+          '(A) $35\\text{ N}$',
+          '(B) $70\\text{ N}$',
+          '(C) $140\\text{ N}$',
+          '(D) $280\\text{ N}$'
+        ],
+        answer: 2,
+        explanation: '1. 水膜邊緣曲率分析：接觸角 $\\theta = 0^\\circ$ 時，水膜邊緣半徑為 $r = \\frac{d}{2}$ 的凹面。<br>2. 壓強差計算：由楊-拉普拉斯公式 $\\Delta P = P_{out} - P_{in} = \\frac{\\gamma}{r} = \\frac{2\\gamma}{d} = \\frac{2 \\times 0.07\\text{ N/m}}{10^{-5}\\text{ m}} = 1.4 \\times 10^4\\text{ Pa}$。<br>3. 計算吸引拉力：此負壓作用於玻璃板面積 $A = 100\\text{ cm}^2 = 10^{-2}\\text{ m}^2$ 上，形成拉力 $F = \\Delta P \\times A = 1.4 \\times 10^4\\text{ Pa} \\times 10^{-2}\\text{ m}^2 = 140\\text{ N}$。'
+      }
+    ];
+
+    let userAnswers = {};
+    let currentFilter = 'all';
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+
+      const filteredData = quizData.filter(item => {
+        if (currentFilter === 'basic') return item.type === 'basic';
+        if (currentFilter === 'advanced') return item.type === 'advanced';
+        return true;
+      });
+
+      filteredData.forEach(q => {
+        const isAnswered = userAnswers.hasOwnProperty(q.id);
+        const selectedOpt = userAnswers[q.id];
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 p-6 transition duration-200 hover:shadow-md";
+        
+        const badgeColor = q.type === 'basic' ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-purple-100 text-purple-800 border-purple-200';
+        const badgeText = q.type === 'basic' ? '基礎觀念' : '進階思考';
+
+        let optionsHTML = '';
+        q.options.forEach((opt, idx) => {
+          let btnStyle = "bg-slate-50 border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-300";
+          
+          if (isAnswered) {
+            if (idx === q.answer) {
+              btnStyle = "bg-emerald-100 border-emerald-500 text-emerald-900 font-semibold";
+            } else if (idx === selectedOpt) {
+              btnStyle = "bg-rose-100 border-rose-500 text-rose-900 font-semibold";
+            } else {
+              btnStyle = "bg-slate-50 border-slate-200 text-slate-400 opacity-60 cursor-not-allowed";
+            }
+          }
+
+          optionsHTML += `
+            <button 
+              onclick="selectAnswer(${q.id}, ${idx})" 
+              ${isAnswered ? 'disabled' : ''}
+              class="w-full text-left px-4 py-3 rounded-xl border text-sm sm:text-base transition duration-150 flex items-center justify-between ${btnStyle}">
+              <span>${opt}</span>
+              ${isAnswered && idx === q.answer ? '<span class="text-emerald-600 font-bold ml-2">✓ 正確</span>' : ''}
+              ${isAnswered && idx === selectedOpt && idx !== q.answer ? '<span class="text-rose-600 font-bold ml-2">✕ 錯誤</span>' : ''}
+            </button>
+          `;
+        });
+
+        let explanationHTML = '';
+        if (isAnswered) {
+          explanationHTML = `
+            <div class="mt-4 p-4 rounded-xl ${selectedOpt === q.answer ? 'bg-emerald-50 border border-emerald-200' : 'bg-rose-50 border border-rose-200'}">
+              <div class="font-bold text-sm mb-1 ${selectedOpt === q.answer ? 'text-emerald-800' : 'text-rose-800'}">
+                ${selectedOpt === q.answer ? '🎉 回答正確！' : '💡 解析與觀念：'}
+              </div>
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                ${q.explanation}
+              </div>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeColor}">${badgeText}</span>
+            <span class="text-xs text-slate-400 font-medium">題號 #${q.id}</span>
+          </div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-800 mb-2">${q.title}</h3>
+          <p class="text-sm sm:text-base text-slate-700 mb-4 leading-relaxed">${q.question}</p>
+          <div class="space-y-2.5">${optionsHTML}</div>
+          ${explanationHTML}
+        `;
+
+        container.appendChild(card);
+      });
+
+      updateScoreboard();
+      renderMathInElement(container, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+    }
+
+    function selectAnswer(questionId, optionIndex) {
+      userAnswers[questionId] = optionIndex;
+      renderQuiz();
+    }
+
+    function updateScoreboard() {
+      const totalQuestions = quizData.length;
+      const answeredCount = Object.keys(userAnswers).length;
+      
+      let correctCount = 0;
+      Object.keys(userAnswers).forEach(qId => {
+        const q = quizData.find(item => item.id == qId);
+        if (q && userAnswers[qId] === q.answer) {
+          correctCount++;
+        }
+      });
+
+      document.getElementById('score-count').innerText = `${correctCount} / ${totalQuestions}`;
+      const percentage = Math.round((answeredCount / totalQuestions) * 100);
+      document.getElementById('progress-count').innerText = `${percentage}%`;
+    }
+
+    function filterCategory(cat) {
+      currentFilter = cat;
+      ['all', 'basic', 'advanced'].forEach(c => {
+        const btn = document.getElementById(`tab-${c}`);
+        if (c === cat) {
+          btn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-indigo-600 text-white shadow";
+        } else {
+          btn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+        }
+      });
+      renderQuiz();
+    }
+
+    function resetQuiz() {
+      if (confirm('確定要清除所有答案重來嗎？')) {
+        userAnswers = {};
+        renderQuiz();
+      }
+    }
+
+    // 初始化渲染
+    window.addEventListener('DOMContentLoaded', () => {
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
